@@ -17,10 +17,14 @@ package org.traccar.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 import org.traccar.database.QueryExtended;
 import org.traccar.database.QueryIgnore;
 import org.traccar.helper.Hashing;
 
+import javax.crypto.SecretKey;
 import java.util.Date;
 
 public class User extends ExtendedModel {
@@ -203,13 +207,23 @@ public class User extends ExtendedModel {
 
     public void setToken(String token) {
         if (token != null && !token.isEmpty()) {
-            if (!token.matches("^[a-zA-Z0-9-]{16,}$")) {
-                throw new IllegalArgumentException("Illegal token");
-            }
+//            if (!token.matches("^[a-zA-Z0-9-]{16,}$")) {
+//                throw new IllegalArgumentException("Illegal token");
+//            }
             this.token = token;
         } else {
             this.token = null;
         }
+    }
+
+    public void setToken() {
+        SecretKey key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+        long EXPIRATION_TIME = 1 * 60 * 60 * 1000;
+        this.token = Jwts.builder()
+                .setSubject(this.name)
+                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .signWith(key)
+                .compact();
     }
 
     private boolean limitCommands;

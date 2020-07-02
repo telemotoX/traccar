@@ -105,6 +105,8 @@ public class SessionResource extends BaseResource {
         if (user != null) {
             request.getSession().setAttribute(USER_ID_KEY, user.getId());
             LogAction.login(user.getId());
+            user.setToken();
+
             return user;
         } else {
             LogAction.failedLogin(ServletHelper.retrieveRemoteAddress(request));

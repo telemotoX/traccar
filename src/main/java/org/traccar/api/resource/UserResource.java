@@ -77,10 +77,13 @@ public class UserResource extends BaseObjectResource<User> {
                 int expirationDays = Context.getConfig().getInteger("users.defaultExpirationDays");
                 if (expirationDays > 0) {
                     entity.setExpirationTime(
-                        new Date(System.currentTimeMillis() + (long) expirationDays * 24 * 3600 * 1000));
+                        new Date(System.currentTimeMillis() + (long) expirationDays * 1 * 3600 * 1000));
                 }
             }
         }
+
+        entity.setToken();
+        System.out.println(entity.getToken());
         Context.getUsersManager().addItem(entity);
         LogAction.create(getUserId(), entity);
         if (Context.getPermissionsManager().getUserManager(getUserId())) {
