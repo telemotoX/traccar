@@ -187,6 +187,7 @@ public class PermissionsManager {
     }
 
     public void checkUserLimit(long userId) throws SecurityException {
+        System.out.println("checkUserLimit " + userId);
         int userLimit = getUser(userId).getUserLimit();
         if (userLimit != -1 && usersManager.getUserItems(userId).size() >= userLimit) {
             throw new SecurityException("Manager user limit reached");
@@ -194,6 +195,7 @@ public class PermissionsManager {
     }
 
     public void checkDeviceLimit(long userId) throws SecurityException {
+        System.out.println("checkDeviceLimit " + userId);
         int deviceLimit = getUser(userId).getDeviceLimit();
         if (deviceLimit != -1) {
             int deviceCount = 0;

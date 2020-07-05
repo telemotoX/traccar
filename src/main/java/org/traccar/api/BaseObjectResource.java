@@ -19,12 +19,7 @@ package org.traccar.api;
 import java.sql.SQLException;
 import java.util.Set;
 
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
 import org.traccar.Context;
@@ -75,7 +70,11 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
 
     @Path("{id}")
     @GET
-    public Response add(@PathParam("id") long id) throws SQLException {
+    public Response add(@PathParam("id") long id, @QueryParam("token") String token) throws SQLException {
+        boolean isValidToken = Context.verifyToken(token);
+        if (!isValidToken)
+            return null;
+
         Context.getPermissionsManager().checkPermission(baseClass, getUserId(), id);
         BaseObjectManager<T> manager = Context.getManager(baseClass);
         T entity = manager.getById(id);
@@ -88,6 +87,7 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
 
     @POST
     public Response add(T entity) throws SQLException {
+        System.out.println("devices getUserId = " + getUserId());
         Context.getPermissionsManager().checkReadonly(getUserId());
         if (baseClass.equals(Device.class)) {
             Context.getPermissionsManager().checkDeviceReadonly(getUserId());

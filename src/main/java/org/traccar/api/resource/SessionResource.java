@@ -56,38 +56,42 @@ public class SessionResource extends BaseResource {
 
     @PermitAll
     @GET
-    public User get(@QueryParam("token") String token) throws SQLException, UnsupportedEncodingException {
-        Long userId = (Long) request.getSession().getAttribute(USER_ID_KEY);
-        if (userId == null) {
-            Cookie[] cookies = request.getCookies();
-            String email = null, password = null;
-            if (cookies != null) {
-                for (Cookie cookie : cookies) {
-                    if (cookie.getName().equals(USER_COOKIE_KEY)) {
-                        byte[] emailBytes = DataConverter.parseBase64(
-                                URLDecoder.decode(cookie.getValue(), StandardCharsets.US_ASCII.name()));
-                        email = new String(emailBytes, StandardCharsets.UTF_8);
-                    } else if (cookie.getName().equals(PASS_COOKIE_KEY)) {
-                        byte[] passwordBytes = DataConverter.parseBase64(
-                                URLDecoder.decode(cookie.getValue(), StandardCharsets.US_ASCII.name()));
-                        password = new String(passwordBytes, StandardCharsets.UTF_8);
-                    }
-                }
-            }
-            if (email != null && password != null) {
-                User user = Context.getPermissionsManager().login(email, password);
-                if (user != null) {
-                    userId = user.getId();
-                    request.getSession().setAttribute(USER_ID_KEY, userId);
-                }
-            } else if (token != null) {
-                User user = Context.getUsersManager().getUserByToken(token);
-                if (user != null) {
-                    userId = user.getId();
-                    request.getSession().setAttribute(USER_ID_KEY, userId);
-                }
-            }
-        }
+    public User get(@QueryParam("token") String token, @QueryParam("userId") Long userId) throws SQLException, UnsupportedEncodingException {
+        boolean isValidToken = Context.verifyToken(token);
+        if (!isValidToken)
+            throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND).build());
+
+//        Long userId = (Long) request.getSession().getAttribute(USER_ID_KEY);
+//        if (userId == null) {
+//            Cookie[] cookies = request.getCookies();
+//            String email = null, password = null;
+//            if (cookies != null) {
+//                for (Cookie cookie : cookies) {
+//                    if (cookie.getName().equals(USER_COOKIE_KEY)) {
+//                        byte[] emailBytes = DataConverter.parseBase64(
+//                                URLDecoder.decode(cookie.getValue(), StandardCharsets.US_ASCII.name()));
+//                        email = new String(emailBytes, StandardCharsets.UTF_8);
+//                    } else if (cookie.getName().equals(PASS_COOKIE_KEY)) {
+//                        byte[] passwordBytes = DataConverter.parseBase64(
+//                                URLDecoder.decode(cookie.getValue(), StandardCharsets.US_ASCII.name()));
+//                        password = new String(passwordBytes, StandardCharsets.UTF_8);
+//                    }
+//                }
+//            }
+//            if (email != null && password != null) {
+//                User user = Context.getPermissionsManager().login(email, password);
+//                if (user != null) {
+//                    userId = user.getId();
+//                    request.getSession().setAttribute(USER_ID_KEY, userId);
+//                }
+//            } else if (token != null) {
+//                User user = Context.getUsersManager().getUserByToken(token);
+//                if (user != null) {
+//                    userId = user.getId();
+//                    request.getSession().setAttribute(USER_ID_KEY, userId);
+//                }
+//            }
+//        }
 
         if (userId != null) {
             Context.getPermissionsManager().checkUserEnabled(userId);
@@ -103,7 +107,7 @@ public class SessionResource extends BaseResource {
             @FormParam("email") String email, @FormParam("password") String password) throws SQLException {
         User user = Context.getPermissionsManager().login(email, password);
         if (user != null) {
-            request.getSession().setAttribute(USER_ID_KEY, user.getId());
+//            request.getSession().setAttribute(USER_ID_KEY, user.getId());
             LogAction.login(user.getId());
             user.setToken();
 

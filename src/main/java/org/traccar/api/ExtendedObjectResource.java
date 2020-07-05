@@ -18,12 +18,18 @@ package org.traccar.api;
 
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.crypto.SecretKey;
 import javax.ws.rs.GET;
 import javax.ws.rs.QueryParam;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.SignatureException;
 import org.traccar.Context;
 import org.traccar.database.ExtendedObjectManager;
 import org.traccar.model.BaseModel;
@@ -36,8 +42,17 @@ public class ExtendedObjectResource<T extends BaseModel> extends BaseObjectResou
 
     @GET
     public Collection<T> get(
-            @QueryParam("all") boolean all, @QueryParam("userId") long userId, @QueryParam("groupId") long groupId,
-            @QueryParam("deviceId") long deviceId, @QueryParam("refresh") boolean refresh) throws SQLException {
+            @QueryParam("all") boolean all,
+            @QueryParam("userId") long userId,
+            @QueryParam("groupId") long groupId,
+            @QueryParam("deviceId") long deviceId,
+            @QueryParam("refresh") boolean refresh,
+            @QueryParam("token") String token
+    ) throws SQLException {
+
+        boolean isValidToken = Context.verifyToken(token);
+        if (!isValidToken)
+            return null;
 
         ExtendedObjectManager<T> manager = (ExtendedObjectManager<T>) Context.getManager(getBaseClass());
         if (refresh) {

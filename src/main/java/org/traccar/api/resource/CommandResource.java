@@ -79,7 +79,13 @@ public class CommandResource extends ExtendedObjectResource<Command> {
     public Collection<Typed> get(
             @QueryParam("deviceId") long deviceId,
             @QueryParam("protocol") String protocol,
-            @QueryParam("textChannel") boolean textChannel) {
+            @QueryParam("textChannel") boolean textChannel,
+            @QueryParam("token") String token
+    ) {
+        boolean isValidToken = Context.verifyToken(token);
+        if (!isValidToken)
+            return null;
+
         if (deviceId != 0) {
             Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
             return Context.getCommandsManager().getCommandTypes(deviceId, textChannel);

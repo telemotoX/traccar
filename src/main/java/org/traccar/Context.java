@@ -18,6 +18,12 @@ package org.traccar;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr353.JSR353Module;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
 import org.apache.velocity.app.VelocityEngine;
 import org.eclipse.jetty.util.URIUtil;
 import org.slf4j.Logger;
@@ -63,11 +69,13 @@ import org.traccar.sms.SmsManager;
 import org.traccar.sms.smpp.SmppClient;
 import org.traccar.web.WebServer;
 
+import javax.crypto.SecretKey;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.ext.ContextResolver;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Date;
 import java.util.Properties;
 
 public final class Context {
@@ -237,6 +245,12 @@ public final class Context {
         return smsManager;
     }
 
+    public static SecretKey secretKey;
+
+    public static SecretKey getSecretKey() {
+        return secretKey;
+    }
+
     private static TripsConfig tripsConfig;
 
     public static TripsConfig getTripsConfig() {
@@ -343,6 +357,8 @@ public final class Context {
 
         commandsManager = new CommandsManager(dataManager, config.getBoolean("commands.queueing"));
 
+        secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+
     }
 
     private static void initEventsModule() {
@@ -405,6 +421,30 @@ public final class Context {
             return (BaseObjectManager<T>) notificationManager;
         }
         return null;
+    }
+
+    public static boolean verifyToken(String token) {
+        SecretKey key = Context.getSecretKey();
+        long limitTime = Context.getConfig().getLong("jwt.expTime");
+        try {
+            Jws<Claims> jwtClaims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            String subject = jwtClaims.getBody().getSubject();
+            Date expTime = jwtClaims.getBody().getExpiration();
+            Date now = new Date();
+
+            if(now.getTime() - expTime.getTime() > limitTime) {
+                // token is invalid
+                return false;
+            }
+            // OK, you can trust this JWT
+        }
+        catch (SignatureException e) {
+            // don't trust this JWT!
+            System.out.println(e);
+            return false;
+        }
+
+        return true;
     }
 
 }

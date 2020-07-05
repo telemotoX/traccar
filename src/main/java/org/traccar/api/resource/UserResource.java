@@ -83,7 +83,7 @@ public class UserResource extends BaseObjectResource<User> {
         }
 
         entity.setToken();
-        System.out.println(entity.getToken());
+
         Context.getUsersManager().addItem(entity);
         LogAction.create(getUserId(), entity);
         if (Context.getPermissionsManager().getUserManager(getUserId())) {

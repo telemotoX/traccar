@@ -17,12 +17,7 @@ package org.traccar.api.resource;
 
 import java.util.Collection;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -51,7 +46,11 @@ public class NotificationResource extends ExtendedObjectResource<Notification> {
 
     @GET
     @Path("notificators")
-    public Collection<Typed> getNotificators() {
+    public Collection<Typed> getNotificators(@QueryParam("token") String token) {
+        boolean isValidToken = Context.verifyToken(token);
+        if (!isValidToken)
+            return null;
+
         return Context.getNotificatorManager().getAllNotificatorTypes();
     }
 

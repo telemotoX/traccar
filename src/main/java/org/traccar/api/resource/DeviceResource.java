@@ -50,7 +50,13 @@ public class DeviceResource extends BaseObjectResource<Device> {
     public Collection<Device> get(
             @QueryParam("all") boolean all, @QueryParam("userId") long userId,
             @QueryParam("uniqueId") List<String> uniqueIds,
-            @QueryParam("id") List<Long> deviceIds) throws SQLException {
+            @QueryParam("id") List<Long> deviceIds,
+            @QueryParam("token") String token
+    ) throws SQLException {
+        boolean isValidToken = Context.verifyToken(token);
+        if (!isValidToken)
+            return null;
+
         DeviceManager deviceManager = Context.getDeviceManager();
         Set<Long> result = null;
         if (all) {

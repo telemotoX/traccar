@@ -23,6 +23,7 @@ import io.jsonwebtoken.security.Keys;
 import org.traccar.database.QueryExtended;
 import org.traccar.database.QueryIgnore;
 import org.traccar.helper.Hashing;
+import org.traccar.Context;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
@@ -217,12 +218,12 @@ public class User extends ExtendedModel {
     }
 
     public void setToken() {
-        SecretKey key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
-        long EXPIRATION_TIME = 1 * 60 * 60 * 1000;
+        SecretKey key = Context.getSecretKey();
+        long expTime = Context.getConfig().getLong("jwt.expTime");
         this.token = Jwts.builder()
                 .setSubject(this.name)
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-                .signWith(key)
+                .setExpiration(new Date(System.currentTimeMillis() + expTime))
+                .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
 
