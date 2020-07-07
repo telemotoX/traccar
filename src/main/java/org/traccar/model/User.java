@@ -221,7 +221,7 @@ public class User extends ExtendedModel {
         SecretKey key = Context.getSecretKey();
         long expTime = Context.getConfig().getLong("jwt.expTime");
         this.token = Jwts.builder()
-                .setSubject(this.name)
+                .setSubject(Long.toString(this.getId()))
                 .setExpiration(new Date(System.currentTimeMillis() + expTime))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();

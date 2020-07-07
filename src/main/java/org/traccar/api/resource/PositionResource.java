@@ -52,13 +52,8 @@ public class PositionResource extends BaseResource {
             @QueryParam("deviceId") long deviceId,
             @QueryParam("id") List<Long> positionIds,
             @QueryParam("from") String from,
-            @QueryParam("to") String to,
-            @QueryParam("token") String token
+            @QueryParam("to") String to
     ) throws SQLException {
-        boolean isValidToken = Context.verifyToken(token);
-        if (!isValidToken)
-            return null;
-
         if (!positionIds.isEmpty()) {
             ArrayList<Position> positions = new ArrayList<>();
             for (Long positionId : positionIds) {

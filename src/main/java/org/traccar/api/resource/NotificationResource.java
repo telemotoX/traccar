@@ -46,11 +46,7 @@ public class NotificationResource extends ExtendedObjectResource<Notification> {
 
     @GET
     @Path("notificators")
-    public Collection<Typed> getNotificators(@QueryParam("token") String token) {
-        boolean isValidToken = Context.verifyToken(token);
-        if (!isValidToken)
-            return null;
-
+    public Collection<Typed> getNotificators() {
         return Context.getNotificatorManager().getAllNotificatorTypes();
     }
 

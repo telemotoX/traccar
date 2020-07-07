@@ -46,14 +46,8 @@ public class ExtendedObjectResource<T extends BaseModel> extends BaseObjectResou
             @QueryParam("userId") long userId,
             @QueryParam("groupId") long groupId,
             @QueryParam("deviceId") long deviceId,
-            @QueryParam("refresh") boolean refresh,
-            @QueryParam("token") String token
+            @QueryParam("refresh") boolean refresh
     ) throws SQLException {
-
-        boolean isValidToken = Context.verifyToken(token);
-        if (!isValidToken)
-            return null;
-
         ExtendedObjectManager<T> manager = (ExtendedObjectManager<T>) Context.getManager(getBaseClass());
         if (refresh) {
             manager.refreshItems();

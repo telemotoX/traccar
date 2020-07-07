@@ -55,6 +55,15 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
         return null;
     }
 
+    public static String decodeJWTAuth(String auth) {
+        auth = auth.replaceFirst("[B|b]earer ", "");
+
+        if (auth != null && auth.length() > 0) {
+            return auth;
+        }
+        return null;
+    }
+
     @javax.ws.rs.core.Context
     private HttpServletRequest request;
 
@@ -71,31 +80,42 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
         SecurityContext securityContext = null;
 
         try {
-
             String authHeader = requestContext.getHeaderString(AUTHORIZATION_HEADER);
             if (authHeader != null) {
-
                 try {
-                    String[] auth = decodeBasicAuth(authHeader);
-                    User user = Context.getPermissionsManager().login(auth[0], auth[1]);
-                    if (user != null) {
-                        Main.getInjector().getInstance(StatisticsManager.class).registerRequest(user.getId());
-                        securityContext = new UserSecurityContext(new UserPrincipal(user.getId()));
+                    try {
+                        String[] auth = decodeBasicAuth(authHeader);
+                        User user = Context.getPermissionsManager().login(auth[0], auth[1]);
+                        if (user != null) {
+                            Main.getInjector().getInstance(StatisticsManager.class).registerRequest(user.getId());
+                            securityContext = new UserSecurityContext(new UserPrincipal(user.getId()));
+                        }
+                    } catch (SQLException e) {
+                        throw new WebApplicationException(e);
                     }
-                } catch (SQLException e) {
-                    throw new WebApplicationException(e);
+                } catch (Exception err) {
+                    try {
+                        String token = decodeJWTAuth(authHeader);
+                        long userId = Context.verifyToken(token);
+                        if (userId > 0) {
+                            Main.getInjector().getInstance(StatisticsManager.class).registerRequest(userId);
+                            securityContext = new UserSecurityContext(new UserPrincipal(userId));
+                        } else {
+                            throw new WebApplicationException(err);
+                        }
+                    } catch (Exception e) {
+                        throw new WebApplicationException(e);
+                    }
                 }
-
-            } else if (request.getSession() != null) {
-
-                Long userId = (Long) request.getSession().getAttribute(SessionResource.USER_ID_KEY);
-                if (userId != null) {
-                    Context.getPermissionsManager().checkUserEnabled(userId);
-                    Main.getInjector().getInstance(StatisticsManager.class).registerRequest(userId);
-                    securityContext = new UserSecurityContext(new UserPrincipal(userId));
-                }
-
             }
+//            } else if (request.getSession() != null) {
+//                Long userId = (Long) request.getSession().getAttribute(SessionResource.USER_ID_KEY);
+//                if (userId != null) {
+//                    Context.getPermissionsManager().checkUserEnabled(userId);
+//                    Main.getInjector().getInstance(StatisticsManager.class).registerRequest(userId);
+//                    securityContext = new UserSecurityContext(new UserPrincipal(userId));
+//                }
+//            }
 
         } catch (SecurityException e) {
             LOGGER.warn("Authentication error", e);
@@ -110,7 +130,7 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
                 if (!XML_HTTP_REQUEST.equals(request.getHeader(X_REQUESTED_WITH))) {
                     responseBuilder.header(WWW_AUTHENTICATE, BASIC_REALM);
                 }
-//                throw new WebApplicationException(responseBuilder.build());
+                throw new WebApplicationException(responseBuilder.build());
             }
         }
 

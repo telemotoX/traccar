@@ -34,11 +34,7 @@ public class SimpleObjectResource<T extends BaseModel> extends BaseObjectResourc
 
     @GET
     public Collection<T> get(
-            @QueryParam("all") boolean all, @QueryParam("userId") long userId, @QueryParam("token") String token) throws SQLException {
-
-        boolean isValidToken = Context.verifyToken(token);
-        if (!isValidToken)
-            return null;
+            @QueryParam("all") boolean all, @QueryParam("userId") long userId) throws SQLException {
 
         BaseObjectManager<T> manager = Context.getManager(getBaseClass());
         return manager.getItems(getSimpleManagerItems(manager, all, userId));

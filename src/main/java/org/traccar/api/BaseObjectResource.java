@@ -70,11 +70,7 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
 
     @Path("{id}")
     @GET
-    public Response add(@PathParam("id") long id, @QueryParam("token") String token) throws SQLException {
-        boolean isValidToken = Context.verifyToken(token);
-        if (!isValidToken)
-            return null;
-
+    public Response add(@PathParam("id") long id) throws SQLException {
         Context.getPermissionsManager().checkPermission(baseClass, getUserId(), id);
         BaseObjectManager<T> manager = Context.getManager(baseClass);
         T entity = manager.getById(id);
@@ -87,7 +83,6 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
 
     @POST
     public Response add(T entity) throws SQLException {
-        System.out.println("devices getUserId = " + getUserId());
         Context.getPermissionsManager().checkReadonly(getUserId());
         if (baseClass.equals(Device.class)) {
             Context.getPermissionsManager().checkDeviceReadonly(getUserId());

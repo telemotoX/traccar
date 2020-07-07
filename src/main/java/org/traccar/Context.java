@@ -423,28 +423,28 @@ public final class Context {
         return null;
     }
 
-    public static boolean verifyToken(String token) {
+    public static long verifyToken(String token) {
         SecretKey key = Context.getSecretKey();
+        String subject;
         long limitTime = Context.getConfig().getLong("jwt.expTime");
         try {
             Jws<Claims> jwtClaims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
-            String subject = jwtClaims.getBody().getSubject();
+            subject = jwtClaims.getBody().getSubject();
             Date expTime = jwtClaims.getBody().getExpiration();
             Date now = new Date();
 
             if(now.getTime() - expTime.getTime() > limitTime) {
                 // token is invalid
-                return false;
+                return 0;
             }
             // OK, you can trust this JWT
         }
         catch (SignatureException e) {
             // don't trust this JWT!
-            System.out.println(e);
-            return false;
+            return 0;
         }
 
-        return true;
+        return Long.parseLong(subject);
     }
 
 }
