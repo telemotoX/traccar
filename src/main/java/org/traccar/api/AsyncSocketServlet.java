@@ -39,9 +39,9 @@ public class AsyncSocketServlet extends WebSocketServlet {
                 String user_id = params[0].split("=")[1];
                 String token = params[1].split("=")[1];
 
-                boolean isValidToken = Context.verifyToken(token);
-                if (isValidToken) {
-                    long userId = Long.parseLong(user_id);
+                long userId = Context.verifyToken(token);
+                if (userId > 0) {
+//                    long userId = Long.parseLong(user_id);
                     return new AsyncSocket(userId);
                 } else {
                     return null;
