@@ -78,13 +78,11 @@ public class SessionResource extends BaseResource {
                 User user = Context.getPermissionsManager().login(email, password);
                 if (user != null) {
                     userId = user.getId();
-//                    request.getSession().setAttribute(USER_ID_KEY, userId);
                 }
             } else if (token != null) {
                 User user = Context.getUsersManager().getUserByToken(token);
                 if (user != null) {
                     userId = user.getId();
-//                    request.getSession().setAttribute(USER_ID_KEY, userId);
                 }
             }
         }
@@ -99,8 +97,7 @@ public class SessionResource extends BaseResource {
 
     @PermitAll
     @POST
-    public User add(
-            @FormParam("email") String email, @FormParam("password") String password) throws SQLException {
+    public User add(@FormParam("email") String email, @FormParam("password") String password) throws SQLException {
         User user = Context.getPermissionsManager().login(email, password);
         if (user != null) {
             request.getSession().setAttribute(USER_ID_KEY, user.getId());
