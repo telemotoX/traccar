@@ -84,7 +84,7 @@ public class Geofence extends ScheduledModel {
     }
 
     @QueryIgnore
-    @JsonIgnore
+    @JsonIgnore 
     public void setGeometry(GeofenceGeometry geometry) {
         area = geometry.toWkt();
         this.geometry = geometry;

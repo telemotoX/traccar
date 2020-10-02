@@ -291,6 +291,6 @@
     <entry key='portman.port'>5211</entry>
 
 
-    <entry key='jwt.expTime'>3600000</entry>
+    <entry key='jwt.expTime'>86400000</entry>
 
 </properties>
