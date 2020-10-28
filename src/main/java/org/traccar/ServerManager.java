@@ -87,6 +87,7 @@ public class ServerManager {
         for (TrackerServer server: serverList) {
             try {
                 server.start();
+                LOGGER.info("Port {} is enabled", server.getPort());
             } catch (BindException e) {
                 LOGGER.warn("Port {} is disabled due to conflict", server.getPort());
             }
