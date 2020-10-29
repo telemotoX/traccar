@@ -114,8 +114,8 @@ public class WebServer {
     }
 
     private void initClientProxy(Config config, HandlerList handlers) {
-        int port = config.getInteger("osmand.port");
-//        int port = config.getInteger("watch.port");
+//        int port = config.getInteger("osmand.port");
+        int port = config.getInteger("watch.port");
         if (port != 0) {
             System.out.println(port);
             ServletContextHandler servletHandler = new ServletContextHandler() {
